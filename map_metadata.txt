@@ -1,0 +1,13 @@
+WorldSeed 2105018183
+PlayerChunkCoords 15994 16048
+DefaultSpawnPos 512033 121 511965
+ChunkSize 32
+SeaLevel 110
+WorldSize 1024000 256 1024000
+RegionSize 512
+AMVersion '0.1.8-pre.3'
+PlayTime 132.0
+GameDate 15. October 1388, 03:56
+Chunks 417
+Chunks Updated 422
+Null Chunks 0
