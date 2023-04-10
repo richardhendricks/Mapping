@@ -1,3 +1,30 @@
 ﻿Name	Description	Location	Time	Destination	Entity_UID
-Note	First_Try	X-212, Y106, Z1574	2023-04-09 20:54:30Z	---	null	
+Sign	Wood	X-845, Y138, Z87	2023-04-09 23:19:33Z	---	null	
+Sign	Wood	X-845, Y139, Z87	2023-04-09 23:19:33Z	---	null	
+Sign	Rock Blocks	X-845, Y137, Z87	2023-04-09 23:19:33Z	---	null	
+Sign	Misc Items	X-848, Y138, Z87	2023-04-09 23:19:33Z	---	null	
+Sign	Misc Blocks	X-848, Y139, Z87	2023-04-09 23:19:33Z	---	null	
+Sign	Stones	X-851, Y137, Z87	2023-04-09 23:19:33Z	---	null	
+Translocator	Functional, Online,  Target: [ Set ], Range (400 ~ 8000)	X-4532, Y37, Z-6554	2023-04-09 23:39:10Z	X-11, Y121, Z-14	null	
+Translocator	Broken, Online,  Target: [ Invalid ], Range (400 ~ 8000)	X10, Y121, Z-11	2023-04-10 01:15:48Z	---	null	
+Translocator	Broken, Online,  Target: [ Invalid ], Range (400 ~ 8000)	X10, Y121, Z-14	2023-04-10 01:15:48Z	---	null	
+Translocator	Broken, Online,  Target: [ Invalid ], Range (400 ~ 8000)	X1, Y121, Z-23	2023-04-10 01:15:48Z	---	null	
+Translocator	Functional, Online,  Target: [ Set ], Range (400 ~ 8000)	X-11, Y121, Z-11	2023-04-10 01:16:06Z	X773, Y27, Z7547	null	
+Translocator	Functional, Online,  Target: [ Set ], Range (400 ~ 8000)	X-11, Y121, Z-14	2023-04-10 01:16:06Z	X-4532, Y37, Z-6554	null	
+Translocator	Broken, Online,  Target: [ Invalid ], Range (400 ~ 8000)	X-2, Y121, Z-23	2023-04-10 01:16:06Z	---	null	
+Translocator	Broken, Online,  Target: [ Invalid ], Range (400 ~ 8000)	X-11, Y125, Z-11	2023-04-10 01:16:06Z	---	null	
+Sign	Feel free toborrow hammer& chisel to rotateitems	X-26, Y116, Z66	2023-04-10 01:16:12Z	---	null	
+Sign	Welcome!Items on/abovethe oak logs arethere to be taken	X-27, Y116, Z69	2023-04-10 01:16:30Z	---	null	
+Sign	Bismuth detected	X-391, Y103, Z-118	2023-04-10 01:18:54Z	---	null	
+Trader	Wilt the furniture trader	X-303, Y115, Z1769	2023-04-09 22:53:31Z	---	1722066
+Trader	Filipe the furniture trader	X899, Y120, Z7589	2023-04-09 23:37:22Z	---	2004888
+Trader	Jasper the commodities merchant	X850, Y115, Z7519	2023-04-09 23:39:40Z	---	2004811
+Trader	Jasper the commodities merchant	X852, Y114, Z5474	2023-04-09 23:41:34Z	---	1883819
+Trader	Oliver the clothing merchant	X281, Y115, Z5486	2023-04-09 23:46:52Z	---	1883803
+Trader	Two Tongue the luxuries merchant	X3089, Y112, Z8016	2023-04-09 23:56:47Z	---	3517439
+Trader	Ra Bal the furniture trader	X2272, Y113, Z8329	2023-04-10 00:18:33Z	---	1975968
+Trader	Mostafa the clothing merchant	X2450, Y113, Z7712	2023-04-10 00:36:41Z	---	1976234
+Trader	Hans the agricultural supplier	X311, Y116, Z-795	2023-04-10 01:05:41Z	---	1801558
+Trader	Quill the treasure hunter	X547, Y113, Z-215	2023-04-10 01:15:12Z	---	1801182
+Trader	Bedwyr the clothing merchant	X-153, Y119, Z179	2023-04-10 01:18:24Z	---	136
 

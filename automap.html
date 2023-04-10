@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+	<meta charset="utf-8">
+	<title>Automap</title>
+	<style>html, body, .map {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+	/* outline: 1px dotted black; */
+}
+
+.infobox {
+	width: 15em;
+	/* height: 15em; */
+	background-color: rgba(200, 200, 200, 0.5);
+	left: 0;
+	top: 0;
+	font-family: sans-serif;
+	position: absolute;
+	z-index: 1;
+}
+
+h1 {
+	font-size: 22px;
+	margin: .6em 1em;
+	text-align: center;
+}
+
+.infoboxTable {
+	margin: .3em auto;
+	width: 90%;
+	outline: 1px solid #333;
+}
+
+.infoboxTable th {
+	width: 30%;
+}
+
+.infoboxTable td {
+	text-align: right;
+}</style>
+</head>
+
+<body>
+	<script type="text/javascript">function ViewFrame() {
+	// dom stuff
+	const map = document.createElement('canvas'); // the map we see
+	map.className = 'map';
+	map.height = window.innerHeight;
+	map.width = window.innerWidth;
+	document.getElementsByTagName('body')[0].append(map);
+	// this is the map that we actually draw on
+	this.map = map.getContext('2d', {
+		alpha: false
+	});
+	this.map.imageSmoothingEnabled = false;
+
+	// the info box in the corner
+	this.infobox = document.getElementsByClassName('infoboxTable')[0];
+	this.infoboxSlots = new Array();
+
+	// load the metadata!
+	this.chunkScript = document.createElement('script');
+	this.chunkScript.type = 'text/javascript';
+	this.chunkScript.src = 'Metadata.js';
+	document.getElementsByTagName('body')[0].append(this.chunkScript);
+	this.chunkScript.addEventListener('load', () => {
+		ViewFrame.initInfobox(this.infobox, this.infoboxSlots);
+		this.x = ViewFrame.chunks.startCoords[0];
+		this.y = ViewFrame.chunks.startCoords[1];
+		this.availableChunks = ViewFrame.chunks.chunkMetadata;
+		this.render();
+	}, {
+		once: true
+	});
+
+	// Tracks images that have been loaded and are on the map
+	this.loadedChunksByName = new Map();
+	// this is needed because [1, 2] != [1, 2] and thats how we store coords.
+	this.loadedChunksByCoords = new Map();
+	this.availableChunks = null; // the chunks in ./Metadata.js
+	// so that we dont render twice at the same time
+	this.rendering = false;
+
+	this.x = -1;
+	this.y = -1; // can be fractional
+	this.zoom = 32; // pixels wide the images are to be
+	this.updateEdges();
+}
+// prototypes, some less... notable? methods are
+// in ViewFrameUtils.js 
+ViewFrame.prototype.reloadChunkList = function () {
+	if (this.chunkScript) {
+		this.chunkScript.remove();
+		delete this.chunkScript;
+	}
+
+	this.chunkScript = document.createElement('script');
+	this.chunkScript.type = 'text/javascript';
+	this.chunkScript.src = 'Metadata.js';
+	document.getElementsByTagName('body')[0].append(this.chunkScript);
+
+	this.chunkScript.addEventListener('load', () => {
+		this.availableChunks = ViewFrame.chunks.chunkMetadata;
+		this.render();
+	});
+};
+
+ViewFrame.prototype.render = function () {
+	if (!this.availableChunks) return;
+	if (this.rendering) clearInterval(ViewFrame.intervalRef);
+	this.rendering = true;
+	this.updateEdges();
+	this.map.clearRect(0, 0, window.innerWidth, window.innerHeight);
+	// culling
+	this.loadedChunksByCoords
+		.forEach((chunk, coord) => { // check the bounds
+			if (coord[0] < this.eastChunk &&
+				coord[0] >= this.westChunk &&
+				coord[1] <= this.northChunk &&
+				coord[1] >= this.southChunk) {
+
+				this.place(chunk, coord[0], coord[1]);
+				return;
+			}
+			// its out of range!!!
+			// get 'em boys!!!!!
+			this.loadedChunksByCoords.delete(coord);
+			this.loadedChunksByName.delete(coord.join('_'));
+			chunk.remove();
+		});
+
+	// gathering what we need to load
+	const neededChunks = new Set();
+	for (var x = this.westChunk; x < this.eastChunk; x++) {
+		for (var y = this.southChunk; y < this.northChunk; y++) {
+			const chunKey = [x, y]; // chunk + key = chunKey :)
+			const name = chunKey.join('_');
+			// continue if its not available, or it is loaded
+			if (!this.availableChunks.has(name) ||
+				this.loadedChunksByName.has(name)) continue;
+			neededChunks.add(chunKey);
+		}
+	}
+	// iterating over everything we need to load
+	const it = neededChunks.values();
+	ViewFrame.intervalRef = setInterval(() => {
+		let round = it.next();
+		if (!round.done) {
+			// load
+			const img = new Image(32, 32);
+			const name = round.value.join('_');
+
+			img.src = 'Chunks/'+ name + '.png';
+
+			decode(img, loadedImage => {
+				this.place(img, round.value[0], round.value[1]);
+			});
+			this.loadedChunksByName.set(name, img);
+			this.loadedChunksByCoords.set(round.value, img);
+		} else {
+			clearInterval(ViewFrame.intervalRef);
+			this.rendering = false;
+		}
+	}, 4);
+};
+
+ViewFrame.prototype.place = function (img, x, y) {
+	x -= this.x;
+	y -= this.y;
+	x *= this.zoom;
+	y *= this.zoom;
+	x += this.width / 2;
+	y += this.height / 2;
+
+	this.map.drawImage(img, Math.floor(x), Math.floor(y), this.zoom, this.zoom);
+};
+
+ViewFrame.prototype.updateInfobox = function (chunkName) {
+	const chunkMeta = this.availableChunks.get(chunkName);
+	this.infoboxSlots.forEach((l, k) => {
+		l.innerText = chunkMeta ? chunkMeta[k] : '0';
+	});
+};</script></script>
+	<script type="text/javascript">ViewFrame.initInfobox = function (ibox, iboxSlots) {
+
+	ViewFrame.chunks
+		.chunkMetadataNames.forEach((item, i) => {
+			const slot = document.createElement('tr');
+			const head = document.createElement('th');
+			head.innerText = item;
+			const row = document.createElement('td');
+			row.innerText = '0';
+			iboxSlots[i] = row;
+			slot.append(head, row);
+			ibox.append(slot);
+		});
+};
+
+ViewFrame.prototype.updateEdges = function () {
+	if (this.width != window.innerWidth || this.height != window.innerHeight) {
+		this.width = window.innerWidth;
+		this.map.canvas.width = this.width;
+		this.height = window.innerHeight;
+		this.map.canvas.height = this.height;
+		this.map.imageSmoothingEnabled = false;
+	}
+	const chunksWide = Math.ceil(this.width / this.zoom);
+	const chunksHigh = Math.ceil(this.height / this.zoom);
+
+	this.east = this.x + chunksWide / 2; // this is fractional and is used to keep track of the edges of the window
+	this.eastChunk = Math.ceil(this.east); // this is not and is used to track the chunks that need to load
+	this.west = this.x - chunksWide / 2;
+	this.westChunk = Math.floor(this.west);
+	this.north = this.y + chunksHigh / 2;
+	this.northChunk = Math.ceil(this.north);
+	this.south = this.y - chunksHigh / 2;
+	this.southChunk = Math.floor(this.south);
+};
+
+ViewFrame.prototype.moveCenter = function (dx, dy) {
+	// to pan when we click on the map!
+	this.x += (dx - this.width / 2) / this.zoom;
+	this.y += (dy - this.height / 2) / this.zoom;
+};
+ViewFrame.prototype.setCenter = function (x, y) {
+	this.x = x;
+	this.y = y;
+};
+
+ViewFrame.prototype.clear = function () {
+	this.loadedChunksByName.clear();
+	this.loadedChunksByCoords.clear();
+	if (this.chunkScript) this.chunkScript.remove();
+	delete this.chunkScript;
+	delete ViewFrame.chunks;
+	this.map.clearRect(0, 0, window.innerWidth, window.innerHeight);
+};
+
+function decode(img, cb) {
+	img.decode()
+		.then(() => {
+			cb(img);
+		})
+		.catch(() => {}); // so images arent added on error
+}</script></script>
+	<div class="infobox">
+		<h1>Chunk Info</h1>
+		<table class="infoboxTable">
+		</table>
+	</div>
+	<script type="text/javascript">const vf = new ViewFrame();
+vf.reloadChunkList();
+
+// the event handlers are in iifes so they dont make unneeded globals.
+// resize, delay re-render to reduce lag.
+(function () {
+	var id;
+	window.addEventListener('resize', () => {
+		clearTimeout(id);
+		id = setTimeout(() => {
+			vf.render();
+		}, 500);
+	});
+}());
+
+// panning
+(function () {
+	var id;
+	vf.map.canvas.addEventListener('mousedown', event => {
+		clearTimeout(id);
+		vf.moveCenter(event.pageX, event.pageY);
+		id = setTimeout(() => {
+			vf.render();
+		}, 250);
+	});
+}());
+
+
+// #### CONTROLS ####
+// hovering
+(function () {
+	var lastX = 0;
+	var lastY = 0;
+	vf.map.canvas.addEventListener('mousemove', event => {
+		// only count if the mouse moved more than a chunk
+		let x = Math.floor(vf.x +
+			(event.clientX - vf.width / 2) / vf.zoom);
+		let y = Math.floor(vf.y +
+			(event.clientY - vf.height / 2) / vf.zoom);
+		if (x == lastX && y == lastY) return;
+		lastX = x;
+		lastY = y;
+		vf.updateInfobox(x + '_' + y);
+	});
+}());
+
+// scroll/zoom
+(function () {
+	var id;
+	vf.map.canvas.addEventListener('wheel', event => {
+		clearTimeout(id);
+		vf.zoom += -Math.sign(event.deltaY)*2;
+		id = setTimeout(() => {
+			vf.render();
+		}, 250);
+	});
+}());
+
+// reload the chunk list every six seconds
+var devBlockReload = false; // disable via command line
+(function () {
+	setInterval(() => {
+		if (devBlockReload) return;
+		vf.reloadChunkList();
+	}, 6000);
+}());</script></script>
+
+</body>
+
+</html>
